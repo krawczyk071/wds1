@@ -1,35 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import useFetchJobs from "./useFetchJobs";
+import { Container } from "react-bootstrap";
+import { useState } from "react";
+import Job from "./Job";
+import JobsPagination from "./JobsPagination";
+import SearchForm from "./SearchForm";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [params, setParams] = useState({});
+  const [page, setPage] = useState(1);
+
+  // console.log("rerendered");
+  const { jobs, loading, error, hasNextPage } = useFetchJobs(params, page);
+
+  function handleParamChange(e) {
+    const param = e.target.name;
+    const value = e.target.value;
+    setPage(1);
+    setParams((prevParams) => {
+      return { ...prevParams, [param]: value };
+    });
+  }
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    <Container className="my-4">
+      <h1 className="mb-4">Adzuna jobs</h1>
+      <SearchForm params={params} onParamChange={handleParamChange} />
+      <JobsPagination page={page} setPage={setPage} hasNextPage={hasNextPage} />
+      {loading && <h1>LOading</h1>}
+      {error && <h1>error</h1>}
+      {jobs.map((job) => {
+        return <Job key={job.id} job={job} />;
+      })}
+      <JobsPagination page={page} setPage={setPage} hasNextPage={hasNextPage} />
+    </Container>
+  );
 }
 
-export default App
+export default App;
